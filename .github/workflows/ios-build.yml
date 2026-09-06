@@ -23,7 +23,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build iOS Framework
-        run: ./gradlew embedAndSignAppleFrameworkForXcode
+        run: |
+          chmod +x ./gradlew
+          ./gradlew embedAndSignAppleFrameworkForXcode
 
       - name: Build Xcode Project
         run: |
@@ -39,4 +41,3 @@ jobs:
         with:
           name: ios-app
           path: build/Build/Products/Release-iphoneos/*.app
-
