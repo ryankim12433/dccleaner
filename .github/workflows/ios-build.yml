@@ -1,43 +1,49 @@
-name: Build iOS IPA
-
+name: Build iOS App
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   workflow_dispatch:
-
 jobs:
-  build:
+  build-ios:
+    name: Build iOS
     runs-on: macos-14
-
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up JDK 21
+      - name: Setup JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
-
+          distribution: temurin
+          java-version: "21"
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
+        uses: gradle/actions/setup-gradle@v4
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+      # Kotlin Multiplatform에서 iOS Framework 생성
       - name: Build iOS Framework
         run: |
-          chmod +x ./gradlew
-          ./gradlew embedAndSignAppleFrameworkForXcode
-
-      - name: Build Xcode Project
+          ./gradlew :composeApp:linkReleaseFrameworkIosArm64
+      # Xcode 프로젝트 빌드
+      - name: Build iOS App
         run: |
-          xcodebuild -project iosApp/iosApp.xcodeproj \
+          xcodebuild \
+            -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
             -sdk iphoneos \
             -configuration Release \
             -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Upload IPA Artifact
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+      # 빌드 결과 확인
+      - name: Show build products
+        run: |
+          echo "=== Build Products ==="
+          find build/Build/Products -maxdepth 3 -type d -name "*.app" -print || true
+      # 결과 업로드
+      - name: Upload iOS App
         uses: actions/upload-artifact@v4
         with:
           name: ios-app
           path: build/Build/Products/Release-iphoneos/*.app
+          if-no-files-found: error
