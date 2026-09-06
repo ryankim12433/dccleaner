@@ -16,22 +16,24 @@ val macIconFile =
     desktopIconsDir.file("app.icns").asFile
 kotlin {
     jvmToolchain(21)
+    // Android
+    androidTarget()
+    // Desktop
+    jvm("desktop")
     // iOS
     iosArm64()
-    // Existing targets
-    androidTarget()
-    jvm("desktop")
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(libs.androidx.compose.ui)
-                implementation(libs.androidx.compose.material3)
-                implementation(libs.androidx.compose.material.icons.extended)
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.materialIconsExtended)
                 implementation(libs.kotlinx.coroutines.core)
             }
         }
-        val jvmMain by creating {
-            dependsOn(commonMain)
+        val jvmMain by getting {
             dependencies {
                 implementation(libs.okhttp)
                 implementation(libs.okhttp.logging)
@@ -45,11 +47,6 @@ kotlin {
         val androidMain by getting {
             dependsOn(jvmMain)
         }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
-        }
         val desktopMain by getting {
             dependsOn(jvmMain)
             kotlin.srcDir(generatedDesktopBuildConfigDir)
@@ -57,10 +54,15 @@ kotlin {
                 implementation(compose.desktop.currentOs)
             }
         }
-        // iOS
-        val iosMain by creating {
-            dependsOn(commonMain)
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
         }
+        // IMPORTANT:
+        // Do NOT manually create iosMain here.
+        // Kotlin Multiplatform creates iosMain automatically
+        // through the default hierarchy for iosArm64().
     }
 }
 val generateDesktopBuildConfig by tasks.registering {
@@ -137,20 +139,21 @@ tasks.register("verifyDesktopRuntimeRestore", Exec::class) {
                 .asFile
         val osName =
             System.getProperty("os.name").lowercase()
-        val launcher = when {
-            osName.contains("mac") ->
-                appDirectory.resolve(
-                    "$desktopPackageName.app/Contents/MacOS/$desktopPackageName"
-                )
-            osName.contains("win") ->
-                appDirectory.resolve(
-                    "$desktopPackageName/$desktopPackageName.exe"
-                )
-            else ->
-                appDirectory.resolve(
-                    "$desktopPackageName/bin/$desktopPackageName"
-                )
-        }
+        val launcher =
+            when {
+                osName.contains("mac") ->
+                    appDirectory.resolve(
+                        "$desktopPackageName.app/Contents/MacOS/$desktopPackageName"
+                    )
+                osName.contains("win") ->
+                    appDirectory.resolve(
+                        "$desktopPackageName/$desktopPackageName.exe"
+                    )
+                else ->
+                    appDirectory.resolve(
+                        "$desktopPackageName/bin/$desktopPackageName"
+                    )
+            }
         check(launcher.isFile) {
             "Packaged desktop launcher was not found: $launcher"
         }
