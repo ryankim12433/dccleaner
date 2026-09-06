@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -247,6 +248,7 @@ fun DccleanerScreenContent(
     maxContentWidth: Dp = Dp.Unspecified
 ) {
     val scrollState = rememberScrollState()
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -256,8 +258,18 @@ fun DccleanerScreenContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .then(if (maxContentWidth != Dp.Unspecified) Modifier.widthIn(max = maxContentWidth) else Modifier)
-                .then(if (applySystemBarsPadding) Modifier.systemBarsPadding() else Modifier)
+                .then(
+                    if (maxContentWidth != Dp.Unspecified)
+                        Modifier.widthIn(max = maxContentWidth)
+                    else
+                        Modifier
+                )
+                .then(
+                    if (applySystemBarsPadding)
+                        Modifier.systemBarsPadding()
+                    else
+                        Modifier
+                )
                 .verticalScroll(scrollState)
                 .padding(20.dp)
         ) {
@@ -266,6 +278,7 @@ fun DccleanerScreenContent(
                 isDarkTheme = state.isDarkTheme,
                 onDarkThemeChange = actions.onDarkThemeChange
             )
+
             Spacer(Modifier.height(24.dp))
 
             if (state.deleteUiActive) {
@@ -301,7 +314,9 @@ fun DccleanerScreenContent(
                     loginInfo = state.loginInfo,
                     onLogoutClick = actions.onLogoutClick
                 )
+
                 Spacer(Modifier.height(20.dp))
+
                 InterruptedDeleteTasksCard(
                     uiColors = state.uiColors,
                     tasks = state.interruptedTasks,
@@ -311,10 +326,16 @@ fun DccleanerScreenContent(
                     onResume = actions.onResumeTask,
                     onDelete = actions.onDeleteTask
                 )
-                if (state.interruptedTasks.isNotEmpty()) Spacer(Modifier.height(20.dp))
+
+                if (state.interruptedTasks.isNotEmpty()) {
+                    Spacer(Modifier.height(20.dp))
+                }
+
                 if (!state.showDeleteProgressDialog) {
                     TabsCard(state, actions)
+
                     Spacer(Modifier.height(20.dp))
+
                     when (state.selectedTab) {
                         0 -> DcCleanerTabContent(
                             uiColors = state.uiColors,
@@ -363,26 +384,37 @@ fun DccleanerScreenContent(
                             onRecordGuestbookLogChange = actions.onRecordGuestbookLogChange,
                             captchaSectionMarker = Modifier.onGloballyPositioned { coordinates ->
                                 actions.onCaptchaSectionPosition(
-                                    (scrollState.value + coordinates.positionInRoot().y).roundToInt()
+                                    (
+                                        scrollState.value +
+                                            coordinates.positionInRoot().y
+                                        ).roundToInt()
                                 )
                             },
                             deleteOptionsSectionMarker = Modifier.onGloballyPositioned { coordinates ->
                                 actions.onDeleteOptionsSectionPosition(
-                                    (scrollState.value + coordinates.positionInRoot().y).roundToInt()
+                                    (
+                                        scrollState.value +
+                                            coordinates.positionInRoot().y
+                                        ).roundToInt()
                                 )
                             },
                             filterOptionsSectionMarker = Modifier.onGloballyPositioned { coordinates ->
                                 actions.onFilterOptionsSectionPosition(
-                                    (scrollState.value + coordinates.positionInRoot().y).roundToInt()
+                                    (
+                                        scrollState.value +
+                                            coordinates.positionInRoot().y
+                                        ).roundToInt()
                                 )
                             },
                             onValidateTwocaptchaKey = actions.onValidateTwocaptchaKey
                         )
+
                         1 -> DaewangconCard(
                             uiColors = state.uiColors,
                             onStartDaewangcon = actions.onStartDaewangconRequest,
                             isDaewangconRunning = state.isDaewangconRunning
                         )
+
                         2 -> GuestbookTabContent(
                             uiColors = state.uiColors,
                             coroutine = coroutineScope,
@@ -416,6 +448,7 @@ fun DccleanerScreenContent(
                     state.loginInfo == null -> Spacer(Modifier.height(24.dp))
                     state.selectedTab != 0 -> Spacer(Modifier.height(20.dp))
                 }
+
                 VersionInfoCard(
                     uiColors = state.uiColors,
                     currentVersion = state.currentVersion,
@@ -424,6 +457,7 @@ fun DccleanerScreenContent(
                     onUpdateClick = actions.onOpenUpdate
                 )
             }
+
             Spacer(Modifier.height(100.dp))
         }
 
@@ -436,10 +470,18 @@ fun DccleanerScreenContent(
                 .padding(top = 8.dp, bottom = 8.dp, end = 4.dp)
         )
 
-        SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.Center))
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.Center)
+        )
+
         if (state.restoringTaskId != null) {
-            DeleteTaskRestoreOverlay(state.uiColors, state.restoringMessage)
+            DeleteTaskRestoreOverlay(
+                state.uiColors,
+                state.restoringMessage
+            )
         }
+
         ScreenDialogs(state, actions)
     }
 }
@@ -454,14 +496,23 @@ private fun HeaderCard(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(8.dp, RoundedCornerShape(16.dp)),
-        colors = CardDefaults.cardColors(containerColor = uiColors.card),
+        colors = CardDefaults.cardColors(
+            containerColor = uiColors.card
+        ),
         border = BorderStroke(1.dp, uiColors.outline),
         shape = RoundedCornerShape(16.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Brush.horizontalGradient(listOf(uiColors.headerStart, uiColors.headerEnd)))
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            uiColors.headerStart,
+                            uiColors.headerEnd
+                        )
+                    )
+                )
                 .padding(20.dp)
         ) {
             Row(
@@ -469,9 +520,18 @@ private fun HeaderCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Build, contentDescription = null, tint = Color.White, modifier = Modifier.size(28.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Build,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    )
+
                     Spacer(Modifier.width(12.dp))
+
                     Text(
                         "디시클리너 모바일",
                         style = MaterialTheme.typography.headlineSmall,
@@ -479,12 +539,21 @@ private fun HeaderCard(
                         fontWeight = FontWeight.Bold
                     )
                 }
+
                 IconButton(
-                    onClick = { onDarkThemeChange(!isDarkTheme) }
+                    onClick = {
+                        onDarkThemeChange(!isDarkTheme)
+                    }
                 ) {
                     Icon(
-                        imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
-                        contentDescription = if (isDarkTheme) "화이트 모드로 전환" else "다크 모드로 전환",
+                        imageVector = if (isDarkTheme)
+                            Icons.Default.LightMode
+                        else
+                            Icons.Default.DarkMode,
+                        contentDescription = if (isDarkTheme)
+                            "화이트 모드로 전환"
+                        else
+                            "다크 모드로 전환",
                         tint = Color.White
                     )
                 }
@@ -493,14 +562,20 @@ private fun HeaderCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TabsCard(state: DccleanerScreenState, actions: DccleanerScreenActions) {
+private fun TabsCard(
+    state: DccleanerScreenState,
+    actions: DccleanerScreenActions
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(4.dp, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = state.uiColors.card),
+        colors = CardDefaults.cardColors(
+            containerColor = state.uiColors.card
+        ),
         border = BorderStroke(1.dp, state.uiColors.outline)
     ) {
         SecondaryTabRow(
@@ -509,35 +584,67 @@ private fun TabsCard(state: DccleanerScreenState, actions: DccleanerScreenAction
             contentColor = state.uiColors.primary,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Tab(selected = state.selectedTab == 0, onClick = { actions.onTabChange(0) }, text = { Text("디시 클리너") })
-            Tab(selected = state.selectedTab == 1, onClick = { actions.onTabChange(1) }, text = { Text("대왕콘 얻기") })
-            Tab(selected = state.selectedTab == 2, onClick = { actions.onTabChange(2) }, text = { Text("방명록 쓰기") })
+            Tab(
+                selected = state.selectedTab == 0,
+                onClick = { actions.onTabChange(0) },
+                text = { Text("디시 클리너") }
+            )
+
+            Tab(
+                selected = state.selectedTab == 1,
+                onClick = { actions.onTabChange(1) },
+                text = { Text("대왕콘 얻기") }
+            )
+
+            Tab(
+                selected = state.selectedTab == 2,
+                onClick = { actions.onTabChange(2) },
+                text = { Text("방명록 쓰기") }
+            )
         }
+
         if (state.selectedTab == 0 || state.selectedTab == 2) {
             TextButton(
-                onClick = { actions.onOpenManual(state.selectedTab) },
+                onClick = {
+                    actions.onOpenManual(state.selectedTab)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                colors = ButtonDefaults.textButtonColors(contentColor = state.uiColors.primary)
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = state.uiColors.primary
+                )
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.MenuBook,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
+
                 Spacer(Modifier.width(6.dp))
-                Text("설명서", fontWeight = FontWeight.SemiBold)
+
+                Text(
+                    "설명서",
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenActions) {
+private fun ScreenDialogs(
+    state: DccleanerScreenState,
+    actions: DccleanerScreenActions
+) {
     if (state.showErrorDialog) {
-        ErrorDialog(state.uiColors, state.errorMessage, actions.onDismissError)
+        ErrorDialog(
+            state.uiColors,
+            state.errorMessage,
+            actions.onDismissError
+        )
     }
+
     if (state.deleteTaskToRemove != null) {
         DeleteTaskRecordDialog(
             uiColors = state.uiColors,
@@ -545,6 +652,7 @@ private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenA
             onDismiss = actions.onDismissDeleteTaskRecord
         )
     }
+
     if (state.showDeleteConfirmDialog) {
         StartDeletionDialog(
             uiColors = state.uiColors,
@@ -555,6 +663,7 @@ private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenA
             onDismiss = actions.onDismissStartDeletion
         )
     }
+
     if (state.showDeleteProgressDialog) {
         TaskProgressDialog {
             DeleteProgressCard(
@@ -566,8 +675,10 @@ private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenA
                 deletedPosts = state.displayedDeletedCount,
                 currentProgress = state.displayedProgress,
                 estimatedTimeLeft = state.estimatedTimeLeft,
-                nextCaptchaEstimatedTimeLeft = state.nextCaptchaEstimatedTimeLeft,
-                isTwoCaptchaConfigured = state.isTwoCaptchaConfigured,
+                nextCaptchaEstimatedTimeLeft =
+                    state.nextCaptchaEstimatedTimeLeft,
+                isTwoCaptchaConfigured =
+                    state.isTwoCaptchaConfigured,
                 currentGallery = state.displayedGallery,
                 deleteLog = state.displayedDeleteLog,
                 onClose = actions.onCloseDeleteProgress,
@@ -576,6 +687,7 @@ private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenA
             )
         }
     }
+
     if (state.showStopDeleteDialog) {
         StopDeleteDialog(
             uiColors = state.uiColors,
@@ -583,6 +695,7 @@ private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenA
             onDismiss = actions.onDismissStopDelete
         )
     }
+
     if (state.showCaptchaDialog) {
         CaptchaDialog(
             uiColors = state.uiColors,
@@ -591,6 +704,7 @@ private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenA
             onOpenAutoCaptchaGuide = actions.onOpenAutoCaptchaGuide
         )
     }
+
     if (state.showDeleteAccountDialog && state.accountToDelete != null) {
         DeleteAccountDialog(
             uiColors = state.uiColors,
@@ -599,6 +713,7 @@ private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenA
             onDismiss = actions.onDismissDeleteAccount
         )
     }
+
     if (state.showDaewangconDialog) {
         DaewangconStartDialog(
             uiColors = state.uiColors,
@@ -606,6 +721,7 @@ private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenA
             onDismiss = actions.onDismissStartDaewangcon
         )
     }
+
     if (state.showDaewangconProgressDialog) {
         TaskProgressDialog {
             DaewangconProgressCard(
@@ -622,6 +738,7 @@ private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenA
             )
         }
     }
+
     if (state.showGuestbookProgressDialog) {
         TaskProgressDialog {
             GuestbookProgressCard(
@@ -635,6 +752,7 @@ private fun ScreenDialogs(state: DccleanerScreenState, actions: DccleanerScreenA
             )
         }
     }
+
     if (state.showStopDaewangconDialog) {
         StopDaewangconDialog(
             uiColors = state.uiColors,
