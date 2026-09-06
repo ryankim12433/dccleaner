@@ -18,7 +18,7 @@ data class DeleteTaskProgress(
     val deleteType: String,
     val selectedGalleries: List<String>,
     val galleryMap: Map<String, String>,
-    @Transient val twoCaptchaApiKey: String = "",
+    val twoCaptchaApiKey: String = "",
     val recommendFilterEnabled: Boolean = false,
     val commentFilterEnabled: Boolean = false,
     val postContentFilterEnabled: Boolean = false,
@@ -55,13 +55,20 @@ data class DeleteTaskProgress(
     val updatedAt: Long = createdAt
 ) {
     fun normalizedForExecution(): DeleteTaskProgress {
-        val effectiveRecommendFilter = recommendFilterEnabled || minRecommendToKeep >= 0
-        val effectiveCommentFilter = commentFilterEnabled || minCommentToKeep >= 0
+        val effectiveRecommendFilter =
+            recommendFilterEnabled || minRecommendToKeep >= 0
+
+        val effectiveCommentFilter =
+            commentFilterEnabled || minCommentToKeep >= 0
+
         val effectivePostContentFilter =
             postContentFilterEnabled || postContentRegex.isNotEmpty()
+
         val effectiveCommentContentFilter =
             commentContentFilterEnabled || commentRegexFilter.isNotEmpty()
-        val effectiveDateFilter = dateFilterEnabled || minPostAgeDaysToDelete >= 0
+
+        val effectiveDateFilter =
+            dateFilterEnabled || minPostAgeDaysToDelete >= 0
 
         return copy(
             recommendFilterEnabled = effectiveRecommendFilter,
@@ -70,7 +77,8 @@ data class DeleteTaskProgress(
             commentContentFilterEnabled = effectiveCommentContentFilter,
             dateFilterEnabled = effectiveDateFilter,
             deleteNewestFirst =
-                (deleteType == "posting" || deleteType == "comment") && deleteNewestFirst,
+                (deleteType == "posting" || deleteType == "comment") &&
+                    deleteNewestFirst,
             minRecommendToKeep = when {
                 minRecommendToKeep >= 0 -> minRecommendToKeep
                 effectiveRecommendFilter -> 1
