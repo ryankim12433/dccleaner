@@ -5,7 +5,8 @@ plugins {
     alias(libs.plugins.jetbrains.compose)
 }
 val desktopPackageName = "DCCleaner Mobile"
-val desktopPackageVersion = providers.gradleProperty("dccleaner.version").get()
+val desktopPackageVersion =
+    providers.gradleProperty("dccleaner.version").get()
 val generatedDesktopBuildConfigDir =
     layout.buildDirectory.dir("generated/source/desktopBuildConfig/kotlin")
 val desktopIconsDir =
@@ -21,7 +22,13 @@ kotlin {
     // Desktop
     jvm("desktop")
     // iOS
-    iosArm64()
+    iosArm64 {
+        binaries {
+            framework {
+                baseName = "composeApp"
+            }
+        }
+    }
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -59,10 +66,6 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-        // IMPORTANT:
-        // Do NOT manually create iosMain here.
-        // Kotlin Multiplatform creates iosMain automatically
-        // through the default hierarchy for iosArm64().
     }
 }
 val generateDesktopBuildConfig by tasks.registering {
