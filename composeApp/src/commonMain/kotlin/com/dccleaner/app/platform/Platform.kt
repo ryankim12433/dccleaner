@@ -2,7 +2,8 @@ package com.dccleaner.app.platform
 
 enum class PlatformFamily {
     Android,
-    Desktop
+    Desktop,
+    iOS
 }
 
 data class RuntimePlatform(
