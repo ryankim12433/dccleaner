@@ -7,16 +7,21 @@ plugins {
 
 val desktopPackageName = "DCCleaner Mobile"
 val desktopPackageVersion = providers.gradleProperty("dccleaner.version").get()
-val generatedDesktopBuildConfigDir = layout.buildDirectory.dir("generated/source/desktopBuildConfig/kotlin")
-val desktopIconsDir = project.layout.projectDirectory.dir("src/desktopMain/resources/icons")
+val generatedDesktopBuildConfigDir =
+    layout.buildDirectory.dir("generated/source/desktopBuildConfig/kotlin")
+val desktopIconsDir =
+    project.layout.projectDirectory.dir("src/desktopMain/resources/icons")
 val windowsIconFile = desktopIconsDir.file("app.ico").asFile
 val macIconFile = desktopIconsDir.file("app.icns").asFile
 
 kotlin {
     jvmToolchain(21)
 
-    androidTarget()
+    // iOS
+    iosArm64()
 
+    // Existing targets
+    androidTarget()
     jvm("desktop")
 
     sourceSets {
@@ -30,8 +35,10 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
             }
         }
+
         val jvmMain by creating {
             dependsOn(commonMain)
+
             dependencies {
                 implementation(libs.okhttp)
                 implementation(libs.okhttp.logging)
@@ -42,20 +49,30 @@ kotlin {
                 implementation(libs.gson)
             }
         }
+
         val androidMain by getting {
             dependsOn(jvmMain)
         }
+
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
             }
         }
+
         val desktopMain by getting {
             dependsOn(jvmMain)
+
             kotlin.srcDir(generatedDesktopBuildConfigDir)
+
             dependencies {
                 implementation(compose.desktop.currentOs)
             }
+        }
+
+        // iOS source set
+        val iosMain by creating {
+            dependsOn(commonMain)
         }
     }
 }
@@ -68,7 +85,9 @@ val generateDesktopBuildConfig by tasks.registering {
         val outputFile = generatedDesktopBuildConfigDir.get()
             .file("com/dccleaner/app/desktop/DesktopBuildConfig.kt")
             .asFile
+
         outputFile.parentFile.mkdirs()
+
         outputFile.writeText(
             """
             package com.dccleaner.app.desktop
@@ -87,6 +106,7 @@ tasks.named("compileKotlinDesktop") {
 
 android {
     namespace = "com.dccleaner.composeapp"
+
     compileSdk {
         version = release(36)
     }
@@ -102,11 +122,13 @@ compose.desktop {
 
         nativeDistributions {
             modules("jdk.unsupported")
+
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Pkg,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi
             )
+
             packageName = desktopPackageName
             packageVersion = desktopPackageVersion
             description = "DCCleaner Mobile desktop application"
@@ -117,6 +139,7 @@ compose.desktop {
                 shortcut = true
                 dirChooser = true
                 perUserInstall = true
+
                 if (windowsIconFile.exists()) {
                     iconFile.set(windowsIconFile)
                 }
@@ -124,6 +147,7 @@ compose.desktop {
 
             macOS {
                 bundleID = "com.dccleaner.app"
+
                 if (macIconFile.exists()) {
                     iconFile.set(macIconFile)
                 }
@@ -134,20 +158,37 @@ compose.desktop {
 
 tasks.register("verifyDesktopRuntimeRestore", Exec::class) {
     dependsOn("createDistributable")
+
     doFirst {
-        val appDirectory = layout.buildDirectory.dir("compose/binaries/main/app").get().asFile
+        val appDirectory =
+            layout.buildDirectory.dir("compose/binaries/main/app").get().asFile
+
         val osName = System.getProperty("os.name").lowercase()
+
         val launcher = when {
             osName.contains("mac") ->
-                appDirectory.resolve("$desktopPackageName.app/Contents/MacOS/$desktopPackageName")
+                appDirectory.resolve(
+                    "$desktopPackageName.app/Contents/MacOS/$desktopPackageName"
+                )
 
             osName.contains("win") ->
-                appDirectory.resolve("$desktopPackageName/$desktopPackageName.exe")
+                appDirectory.resolve(
+                    "$desktopPackageName/$desktopPackageName.exe"
+                )
 
             else ->
-                appDirectory.resolve("$desktopPackageName/bin/$desktopPackageName")
+                appDirectory.resolve(
+                    "$desktopPackageName/bin/$desktopPackageName"
+                )
         }
-        check(launcher.isFile) { "Packaged desktop launcher was not found: $launcher" }
-        commandLine(launcher.absolutePath, "--verify-storage-runtime")
+
+        check(launcher.isFile) {
+            "Packaged desktop launcher was not found: $launcher"
+        }
+
+        commandLine(
+            launcher.absolutePath,
+            "--verify-storage-runtime"
+        )
     }
 }
