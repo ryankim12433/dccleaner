@@ -1,0 +1,28 @@
+import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                Image(systemName: "trash.circle.fill")
+                    .font(.system(size: 72))
+
+                Text("DC Cleaner")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+
+                Text("내 디시인사이드 게시글과 댓글을 관리하세요.")
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+
+                Button("시작하기") {
+                    // 다음 단계에서 로그인 화면 연결
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+            }
+            .padding(24)
+            .navigationTitle("DC Cleaner")
+        }
+    }
+}
